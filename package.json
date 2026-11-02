@@ -1,0 +1,23 @@
+{
+  "name": "wizard-study-rpg",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Study-powered wizard RPG: verified focus time becomes research points, spells and turn-based adventures.",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web -c magenta,cyan \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w client && npm run build -w server",
+    "start": "npm run start -w server",
+    "test": "npm test -w server",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w client"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
