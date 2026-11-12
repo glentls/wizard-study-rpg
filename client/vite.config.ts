@@ -1,12 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// In development the API runs on :3001; proxying keeps everything same-origin so the
-// SameSite=Strict refresh cookie works exactly as it does in production.
+// The MVP is fully client-side: progress is saved in the browser, so there is no API to proxy.
+// `base: './'` lets the built game be opened from any static host or sub-folder (e.g. a hackathon page).
 export default defineConfig({
+  base: './',
   plugins: [react()],
-  server: {
-    port: 5173,
-    proxy: { '/v1': { target: 'http://localhost:3001', changeOrigin: false } },
-  },
+  server: { port: 5173 },
 });

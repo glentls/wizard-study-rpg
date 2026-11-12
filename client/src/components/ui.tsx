@@ -1,58 +1,61 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 
-export function Meter({ value, max, label, tone = 'accent', showValue = true }: { value: number; max: number; label: string; tone?: 'accent' | 'hp' | 'mana' | 'gold'; showValue?: boolean }) {
-  const pct = max > 0 ? Math.min(100, Math.max(0, (value / max) * 100)) : 0;
+export function Modal({
+  title,
+  children,
+  onClose,
+  className = '',
+  labelledBy,
+}: {
+  title?: ReactNode;
+  children: ReactNode;
+  onClose?: () => void;
+  className?: string;
+  labelledBy?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null;
+    const first = ref.current?.querySelector<HTMLElement>('[autofocus], input, button:not([disabled])');
+    first?.focus();
+    return () => prev?.focus?.();
+  }, []);
+
+  useEffect(() => {
+    if (!onClose) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
   return (
-    <div className="meter">
-      <div className="meter-label">
-        <span>{label}</span>
-        {showValue && (
-          <span className="meter-value">
-            {value} / {max}
-          </span>
+    <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose?.()}>
+      <div ref={ref} className={`modal parchment ${className}`} role="dialog" aria-modal="true" aria-labelledby={labelledBy ?? 'modal-title'}>
+        {title && (
+          <h2 id="modal-title" className="modal__title">
+            {title}
+          </h2>
         )}
-      </div>
-      <div className={`meter-track tone-${tone}`} role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={max} aria-valuenow={value}>
-        <div className="meter-fill" style={{ width: `${pct}%` }} />
+        {children}
       </div>
     </div>
   );
 }
 
-export function Alert({ kind = 'info', children }: { kind?: 'info' | 'error' | 'success' | 'warning'; children: ReactNode }) {
+export function Bar({ value, max, className = '', label }: { value: number; max: number; className?: string; label: string }) {
+  const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
   return (
-    <div className={`alert alert-${kind}`} role={kind === 'error' ? 'alert' : 'status'}>
-      {children}
+    <div className={`bar ${className}`} role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={max} aria-valuenow={value}>
+      <div className="bar__fill" style={{ width: `${pct}%` }} />
     </div>
   );
 }
 
-export function Loading({ label = 'Loading' }: { label?: string }) {
+export function BackButton({ onClick, label = 'Back' }: { onClick: () => void; label?: string }) {
   return (
-    <p className="loading" role="status">
-      <span className="spinner" aria-hidden="true" /> {label}…
-    </p>
-  );
-}
-
-export function PageHeader({ title, subtitle, children }: { title: string; subtitle?: ReactNode; children?: ReactNode }) {
-  return (
-    <header className="page-header">
-      <div>
-        <h1>{title}</h1>
-        {subtitle && <p className="muted">{subtitle}</p>}
-      </div>
-      {children && <div className="page-header-actions">{children}</div>}
-    </header>
-  );
-}
-
-export function Stat({ label, value, hint }: { label: string; value: ReactNode; hint?: ReactNode }) {
-  return (
-    <div className="stat">
-      <span className="stat-label">{label}</span>
-      <span className="stat-value">{value}</span>
-      {hint && <span className="stat-hint">{hint}</span>}
-    </div>
+    <button type="button" className="btn btn--ghost back-btn" onClick={onClick}>
+      <span aria-hidden="true">←</span> {label}
+    </button>
   );
 }
